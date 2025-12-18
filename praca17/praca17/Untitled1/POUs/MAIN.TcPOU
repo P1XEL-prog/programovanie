@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="MAIN" Id="{75a32215-d45a-40ed-b964-dcbe117c630b}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	casovac: TON;
+	M3: BOOL;
+	M2: BOOL;
+	M1: BOOL;
+	stop: BOOL;
+	start: BOOL;
+	casovac2: ton;
+	start2: bool;
+	stav: int;
+	LedM3: BOOL;
+	LedM2: BOOL;
+	LedM1: BOOL;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[IF start = TRUE THEN
+    stav := 10;
+END_IF;
+
+IF stop = TRUE THEN
+    stav := 0;
+END_IF;
+
+CASE stav OF
+
+0:   
+     M1 := FALSE;
+     M2 := FALSE;
+     M3 := FALSE;
+    casovac(IN := FALSE);
+    casovac2(IN := FALSE);
+	ledM1 := FALSE;
+	ledM2 := FALSE;
+	ledM3 := FALSE;
+10:  
+     IF start = TRUE THEN
+         M1 := TRUE;
+     END_IF;
+
+     IF M1 = TRUE THEN
+         casovac(IN := TRUE, PT := T#5M);
+		 LedM1 :=  TRUE;
+     END_IF;
+
+     IF casovac.Q = TRUE AND start2 = TRUE THEN
+         M2 := TRUE;
+		 LedM2 := TRUE;
+     END_IF;
+
+     IF M2 = TRUE THEN
+         casovac2(IN := TRUE, PT := T#5M);
+     END_IF;
+
+     IF casovac2.Q = TRUE THEN
+         M3 := TRUE;
+		 LedM3 := TRUE;
+     END_IF;
+	 
+	 
+	
+
+END_CASE;]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
