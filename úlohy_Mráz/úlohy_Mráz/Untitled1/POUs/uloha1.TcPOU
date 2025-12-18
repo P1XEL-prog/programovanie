@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1">
+  <POU Name="uloha1" Id="{eaccaacd-b563-4f99-b516-834fdc1fdcdf}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM uloha1
+VAR
+	stop: bool;
+	Motor: bool;
+	start: bool;
+	stav: INT;
+	casovac: TON;
+	casovac2: Ton;
+	RUN: BOOL;
+	stopDelay: Ton;
+	resetDelay: ton;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[
+IF stop THEN
+    RUN := FALSE;
+
+ELSIF start THEN
+    RUN := TRUE;
+END_IF;
+
+CASE stav OF
+
+    0: 
+        Motor := FALSE;
+        casovac(IN := FALSE, PT := T#5S);
+
+        IF RUN THEN
+            stav := 10;
+        END_IF;
+
+
+    10: 
+        Motor := TRUE;
+        casovac(IN := TRUE, PT := T#5S);
+
+        IF casovac.Q THEN
+            casovac(IN := FALSE, PT := T#5S);  
+            stav := 20;
+        END_IF;
+
+        IF NOT RUN THEN
+            stav := 0;
+        END_IF;
+
+    20: 
+        Motor := FALSE;
+        casovac(IN := TRUE, PT := T#5S);
+
+        IF casovac.Q THEN
+            casovac(IN := FALSE, PT := T#5S);   
+            stav := 10;
+        END_IF;
+
+        IF NOT RUN THEN
+            stav := 0;
+        END_IF;
+
+END_CASE;
+IF stop = TRUE THEN
+    resetDelay(IN := TRUE, PT := T#1S);
+END_IF;
+
+IF resetDelay.Q THEN
+    Motor := FALSE;
+    start := FALSE;
+    stop := FALSE;        
+    resetDelay(IN := FALSE, PT := T#1S);
+END_IF;
+
+
+]]></ST>
+    </Implementation>
+  </POU>
+</TcPlcObject>
